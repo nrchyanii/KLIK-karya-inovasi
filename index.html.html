@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLIK — Kartu Literasi, Inovasi, dan Keterampilan</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        klik: {
+                            dark: '#0f4c5c',     /* Biru Kehijauan Gelap */
+                            teal: '#136f63',     /* Teal Aksesibilitas */
+                            light: '#e0f2f1',    /* Latar Soft */
+                            orange: '#fb8b24',   /* Jingga Hangat */
+                            accent: '#e36414',   /* Jingga Tua */
+                            bg: '#f8fafc',       /* Putih Gading / Light Gray */
+                            surface: '#ffffff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-klik-dark text-white sticky top-0 z-50 shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Tagline -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('landing')">
+                    <div class="w-10 h-10 rounded-xl bg-klik-orange flex items-center justify-center font-black text-xl text-white shadow">
+                        K
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg tracking-wide flex items-center space-x-2">
+                            <span>KLIK</span>
+                            <span class="text-xs bg-klik-orange text-white px-2 py-0.5 rounded-full font-medium">SMK Experiential</span>
+                        </div>
+                        <p class="text-xs text-gray-300 hidden sm:block">Kartu Literasi, Inovasi, dan Keterampilan</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs / Role Switcher -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-slate-800/60 p-1 rounded-xl flex items-center border border-slate-700">
+                        <button id="role-btn-student" onclick="setRole('student')" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            <span>Mode Murid</span>
+                        </button>
+                        <button id="role-btn-teacher" onclick="setRole('teacher')" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                            <span>Mode Guru</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub Header: Subject & Stepper (Visible when in student learning workflow) -->
+    <div id="learning-stepper-bar" class="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40 hidden no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <span class="font-semibold text-klik-dark" id="stepper-subject">Produksi Film</span>
+                    <span>&bull;</span>
+                    <span id="stepper-topic" class="text-gray-500 font-medium truncate max-w-xs">Teknik Pengambilan Gambar Visual</span>
+                </div>
+                
+                <!-- 6 Steps Indicator -->
+                <div class="flex items-center justify-between md:justify-end space-x-1 sm:space-x-2 overflow-x-auto py-1">
+                    <button onclick="switchStep(1)" id="step-btn-1" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>1. Diagnostic</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+                    <button onclick="switchStep(2)" id="step-btn-2" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>2. Materi</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+                    <button onclick="switchStep(3)" id="step-btn-3" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>3. Tantangan</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+                    <button onclick="switchStep(4)" id="step-btn-4" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>4. LKPD</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+                    <button onclick="switchStep(5)" id="step-btn-5" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>5. Refleksi</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+                    <button onclick="switchStep(6)" id="step-btn-6" class="step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 transition">
+                        <span>6. Hasil</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- Notification Banner -->
+        <div id="toast-message" class="hidden fixed bottom-6 right-6 bg-klik-dark text-white px-5 py-3 rounded-xl shadow-2xl z-50 flex items-center space-x-3 border border-klik-orange">
+            <i data-lucide="info" class="w-5 h-5 text-klik-orange"></i>
+            <span id="toast-text" class="text-sm font-medium">Pesan notifikasi</span>
+        </div>
+
+        <!-- 0. LANDING PAGE VIEW -->
+        <section id="view-landing" class="view-panel space-y-12">
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-br from-klik-dark via-klik-teal to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10">
+                    <i data-lucide="layers" class="w-96 h-96"></i>
+                </div>
+                <div class="relative z-10 max-w-3xl space-y-6">
+                    <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium text-klik-orange">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        <span>Modul Ajar Digital Experiential Learning SMK</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                        KLIK — Kartu Literasi, Inovasi, dan Keterampilan
+                    </h1>
+                    <p class="text-lg sm:text-xl text-emerald-100 font-light leading-relaxed">
+                        “Belajar dari Pengalaman, Berkarya dengan Makna.”
+                    </p>
+                    <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
+                        KLIK adalah bahan ajar digital interaktif yang memandu murid SMK melewati 6 tahap pembelajaran berbasis pengalaman: mulai dari kesiapan belajar, pemahaman materi, tantangan nyata, rancangan karya digital (LKPD), refleksi, hingga lacak perkembangan.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <button onclick="startStudentFlow()" class="px-6 py-3.5 bg-klik-orange hover:bg-klik-accent text-white font-bold rounded-xl shadow-lg transition flex items-center space-x-2">
+                            <span>Mulai Pembelajaran (Murid)</span>
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="promptTeacherAuth()" class="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition flex items-center space-x-2">
+                            <i data-lucide="lock" class="w-4 h-4 text-klik-orange"></i>
+                            <span>Buka Dashboard Guru</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-teal-50 text-klik-teal flex items-center justify-center mb-4">
+                        <i data-lucide="compass" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Asesmen Diagnostik Adaptif</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Mengenali kesiapan belajar murid awal tanpa memberikan label tetap, memberikan rekomendasi materi penguatan secara fleksibel.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-orange-50 text-klik-orange flex items-center justify-center mb-4">
+                        <i data-lucide="dices" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Kartu Tantangan Digital</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Pengundian kartu tantangan kontekstual berbasis kasus kejuruan nyata yang memicu pemikiran kritis dan kreasi karya.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-klik-dark flex items-center justify-center mb-4">
+                        <i data-lucide="file-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">LKPD & Refleksi Terintegrasi</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Pencatatan rancangan solusi kelompok, pengumpulan bukti dokumentasi, evaluasi sebaya, serta ekspor PDF/Cetak LKPD digital.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Active Subject Preview Card -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        <h2 class="font-bold text-gray-900">Modul Pembelajaran Aktif</h2>
+                    </div>
+                    <span class="text-xs bg-gray-100 text-gray-700 font-semibold px-3 py-1 rounded-full">Fase F - SMK</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Mata Pelajaran & Elemen</p>
+                        <h4 class="text-lg font-bold text-klik-dark mt-1" id="preview-subject-title">Produksi Film — Tata Kamera dan Tata Cahaya Film</h4>
+                        <p class="text-sm text-gray-600 mt-2" id="preview-subject-topic">Topik: Teknik Pengambilan Gambar untuk Membangun Makna Visual</p>
+                    </div>
+                    <div class="space-y-2 text-xs text-gray-600">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-klik-orange"></i>
+                            <span>Alokasi Waktu: <strong>2 × 45 Menit</strong></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="cpu" class="w-4 h-4 text-klik-teal"></i>
+                            <span>Pendekatan: <strong>Experiential Learning (Student-Centered)</strong></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="target" class="w-4 h-4 text-klik-dark"></i>
+                            <span>Fokus Tantangan: <strong>Merancang Makna Visual Visual & Shot Size</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STUDENT WORKFLOW VIEWS (TAHAP 1 - 6) -->
+
+        <!-- TAHAP 1 — KENALI KESIAPAN (Asesmen Diagnostik) -->
+        <section id="view-step-1" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                <div class="flex items-center justify-between border-b pb-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-klik-teal uppercase tracking-widest">Tahap 1 dari 6</span>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                            <i data-lucide="help-circle" class="w-6 h-6 text-klik-teal"></i>
+                            <span>Kenali Kesiapan (Asesmen Diagnostik)</span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Lengkapi identitas diri Anda dan jawab pertanyaan untuk mengukur kesiapan awal belajar.</p>
+                    </div>
+                    <span class="bg-teal-50 text-klik-teal px-3 py-1.5 rounded-xl font-bold text-sm" id="diag-score-display">Skor: -</span>
+                </div>
+
+                <!-- Form Registrasi Identitas Murid -->
+                <div class="mb-8 p-5 bg-teal-50/60 rounded-2xl border border-teal-100 space-y-4">
+                    <div class="flex items-center space-x-2 text-klik-dark font-bold text-sm">
+                        <i data-lucide="user-check" class="w-4 h-4 text-klik-teal"></i>
+                        <span>Identitas Murid</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap Murid <span class="text-red-500">*</span></label>
+                            <input type="text" id="student-name-input" onchange="updateStudentIdentity()" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Masukkan nama lengkap Anda...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kelas / Rombel <span class="text-red-500">*</span></label>
+                            <input type="text" id="student-class-input" onchange="updateStudentIdentity()" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="misal: XII Produksi Film 1">
+                        </div>
+                    </div>
+                </div>
+
+                <form id="diagnostic-form" class="space-y-8">
+                    <!-- Q1 PG -->
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">1. Manakah dari pilihan shot size berikut yang paling efektif untuk memperlihatkan emosi dan ekspresi wajah karakter secara mendalam?</label>
+                            <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Pilihan Ganda</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="radio" name="diag-q1" value="Extreme Long Shot" class="text-klik-dark focus:ring-klik-teal">
+                                <span>A. Extreme Long Shot (ELS)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="radio" name="diag-q1" value="Close Up" class="text-klik-dark focus:ring-klik-teal">
+                                <span>B. Close Up (CU)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="radio" name="diag-q1" value="Medium Shot" class="text-klik-dark focus:ring-klik-teal">
+                                <span>C. Medium Shot (MS)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q2 Benar/Salah -->
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">2. Sudut pengambilan gambar Low Angle memberikan kesan subjek terlihat lemah, tertekan, dan tidak berdaya.</label>
+                            <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Benar / Salah</span>
+                        </div>
+                        <div class="flex space-x-4 text-sm">
+                            <label class="flex-1 flex items-center justify-center space-x-2 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="radio" name="diag-q2" value="Benar" class="text-klik-dark">
+                                <span class="font-medium">Benar</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center space-x-2 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="radio" name="diag-q2" value="Salah" class="text-klik-dark">
+                                <span class="font-medium">Salah</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q3 Isian Singkat -->
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">3. Menurut pemahaman awal Anda, apa fungsi utama pergerakan kamera (camera movement) Tilting dalam sebuah adegan?</label>
+                            <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Jawaban Singkat</span>
+                        </div>
+                        <textarea id="diag-q3" rows="2" class="w-full p-3 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="submitDiagnostic()" class="px-6 py-3 bg-klik-dark hover:bg-klik-teal text-white font-bold rounded-xl shadow transition flex items-center space-x-2">
+                            <span>Kirim & Lihat Hasil Diagnostik</span>
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Feedback & Rekomendasi Box -->
+                <div id="diagnostic-result-box" class="hidden mt-6 p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
+                    <div class="flex items-center space-x-2 text-emerald-800 font-bold">
+                        <i data-lucide="award" class="w-5 h-5 text-emerald-600"></i>
+                        <h4 class="text-base">Hasil & Rekomendasi Belajar Diagnostik</h4>
+                    </div>
+                    <p id="diagnostic-feedback-text" class="text-sm text-emerald-900 leading-relaxed"></p>
+                    <div class="pt-2 flex justify-end">
+                        <button onclick="switchStep(2)" class="px-5 py-2.5 bg-klik-orange text-white text-sm font-bold rounded-xl hover:bg-klik-accent transition flex items-center space-x-2">
+                            <span>Lanjut ke Tahap 2: Lihat & Pelajari</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAHAP 2 — LIHAT DAN PELAJARI (Materi Pembelajaran) -->
+        <section id="view-step-2" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="border-b pb-4 flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-bold text-klik-teal uppercase tracking-widest">Tahap 2 dari 6</span>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                            <i data-lucide="book-open" class="w-6 h-6 text-klik-teal"></i>
+                            <span>Lihat dan Pelajari (Eksplorasi Konsep)</span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Pahami konsep dasar teknik visual sebelum melangkah ke simulasi dan tantangan.</p>
+                    </div>
+                </div>
+
+                <!-- Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Text & Concept -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="prose max-w-none text-gray-700 text-sm sm:text-base leading-relaxed space-y-3">
+                            <h3 class="text-lg font-bold text-klik-dark">1. Bahasa Visual & Ukuran Frame (Shot Size)</h3>
+                            <p>
+                                Dalam tata kamera film, ukuran bingkai (shot size) bukan sekadar menentukan seberapa dekat penonton dengan subjek, melainkan cara menyampaikan tingkat kedekatan emosional dan makna naratif.
+                            </p>
+                            <ul class="list-disc pl-5 space-y-1 text-sm">
+                                <li><strong>Extreme Long Shot (ELS):</strong> Menjelaskan konteks lingkungan, isolasi, atau skala lokasi yang megah.</li>
+                                <li><strong>Medium Shot (MS):</strong> Menunjukkan hubungan antara karakter dan lingkungan sekitarnya (pinggang ke atas).</li>
+                                <li><strong>Close Up (CU):</strong> Menyoroti ekspresi wajah, rahasia emosi, dan dramatika karakter.</li>
+                            </ul>
+
+                            <h3 class="text-lg font-bold text-klik-dark pt-2">2. Sudut Kamera (Camera Angle) & Pencahayaan</h3>
+                            <p>
+                                High Angle membuat subjek terlihat kerdil atau tertekan, sedangkan Low Angle memberi kesan dominan dan penuh kuasa. Kombinasi tata cahaya *High-Key* (terang/ceria) atau *Low-Key* (bayangan kontras/misterius) memperkuat suasana emosional adegan.
+                            </p>
+                        </div>
+
+                        <!-- Interactive Concept Simulation -->
+                        <div class="bg-slate-900 text-white p-5 rounded-2xl space-y-4 border border-slate-700">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-sm text-klik-orange flex items-center space-x-2">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                    <span>Simulasi Interaktif Visualizer Shot Size</span>
+                                </h4>
+                                <span class="text-xs bg-slate-800 text-gray-300 px-2 py-1 rounded">Interactive Preview</span>
+                            </div>
+                            
+                            <div id="sim-frame" class="w-full h-48 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700 relative overflow-hidden transition-all duration-300">
+                                <div id="sim-subject" class="w-20 h-28 bg-gradient-to-t from-klik-orange to-amber-300 rounded-lg flex flex-col items-center justify-center text-slate-900 font-extrabold text-xs transition-all duration-500 shadow-xl">
+                                    <i data-lucide="user" class="w-10 h-10"></i>
+                                    <span id="sim-label">Subjek</span>
+                                </div>
+                                <div class="absolute bottom-2 left-2 text-[10px] text-gray-400 bg-slate-950/70 px-2 py-1 rounded">
+                                    Angle: <span id="sim-angle-text">Eye Level</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-xs">
+                                <button onclick="updateSim('CU')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-semibold">Close Up</button>
+                                <button onclick="updateSim('MS')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-semibold">Medium Shot</button>
+                                <button onclick="updateSim('ELS')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-semibold">Long Shot</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Summary & Reflective Trigger -->
+                    <div class="space-y-4">
+                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-3">
+                            <h4 class="font-bold text-amber-900 text-sm flex items-center space-x-1">
+                                <i data-lucide="help-circle" class="w-4 h-4 text-amber-700"></i>
+                                <span>Pertanyaan Pemantik</span>
+                            </h4>
+                            <p class="text-xs text-amber-800 italic leading-relaxed">
+                                "Bagaimana sebuah sudut kamera sederhana dapat mengubah persepsi penonton terhadap karakter dari seseorang yang kuat menjadi sosok yang rentan?"
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-xl space-y-3">
+                            <h4 class="font-bold text-gray-900 text-sm">Ringkasan Materi</h4>
+                            <ul class="text-xs text-gray-600 space-y-2">
+                                <li class="flex items-start space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-klik-teal flex-shrink-0 mt-0.5"></i>
+                                    <span>Shot size mengendalikan fokus emosi penonton.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-klik-teal flex-shrink-0 mt-0.5"></i>
+                                    <span>Camera angle menentukan posisi relasi kuasa karakter.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-klik-teal flex-shrink-0 mt-0.5"></i>
+                                    <span>Pencahayaan membangun atmosfer dan impresi makna.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Confirmation Button -->
+                        <div class="pt-4 border-t space-y-2">
+                            <button onclick="confirmUnderstanding(true)" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                <span>Saya Sudah Memahami Materi</span>
+                            </button>
+                            <button onclick="confirmUnderstanding(false)" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs transition">
+                                Saya Perlu Mempelajari Kembali
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAHAP 3 — IDENTIFIKASI TANTANGAN (Kartu Tantangan Digital) -->
+        <section id="view-step-3" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="border-b pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <span class="text-xs font-bold text-klik-orange uppercase tracking-widest">Tahap 3 dari 6</span>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                            <i data-lucide="dices" class="w-6 h-6 text-klik-orange"></i>
+                            <span>Identifikasi Tantangan (Kartu Digital)</span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Undi kartu tantangan untuk memperoleh topik emosi visual dan situasi kasus kejuruan.</p>
+                    </div>
+
+                    <!-- Filter Difficulty -->
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="text-gray-500 font-semibold">Tingkat:</span>
+                        <select id="challenge-level-filter" onchange="filterChallenges()" class="bg-slate-100 border border-gray-300 rounded-lg px-2.5 py-1.5 font-medium text-gray-700 focus:outline-none">
+                            <option value="all">Semua Tingkat</option>
+                            <option value="Dasar">Dasar</option>
+                            <option value="Menengah">Menengah</option>
+                            <option value="Lanjutan">Lanjutan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Card Draw Area -->
+                <div class="flex flex-col items-center justify-center py-6 space-y-6">
+                    <!-- Interactive Card Container -->
+                    <div id="challenge-card-container" class="card-flip w-full max-w-sm h-96 cursor-pointer" onclick="drawChallengeCard()">
+                        <div id="challenge-card-inner" class="card-inner w-full h-full relative rounded-3xl shadow-2xl border-4 border-white">
+                            <!-- Card Front (Default Draw view) -->
+                            <div class="card-front absolute inset-0 bg-gradient-to-br from-klik-dark via-klik-teal to-slate-900 rounded-3xl p-6 flex flex-col justify-between items-center text-white text-center border border-teal-500/30">
+                                <div class="w-full flex justify-between items-center text-xs text-gray-300">
+                                    <span class="bg-white/10 px-2 py-1 rounded">KLIK Challenge Card</span>
+                                    <i data-lucide="sparkles" class="w-4 h-4 text-klik-orange"></i>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="w-20 h-20 mx-auto rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+                                        <i data-lucide="help-circle" class="w-10 h-10 text-klik-orange"></i>
+                                    </div>
+                                    <h3 class="text-xl font-black tracking-wide">KLIK KARTU TANTANGAN</h3>
+                                    <p class="text-xs text-gray-300">Klik di sini atau tombol di bawah untuk mengundi tantangan kelompok Anda!</p>
+                                </div>
+                                <div class="text-[11px] text-emerald-300 font-medium">
+                                    Klik Untuk Membuka Kartu
+                                </div>
+                            </div>
+
+                            <!-- Card Back (Revealed Challenge) -->
+                            <div class="card-back absolute inset-0 bg-white rounded-3xl p-6 flex flex-col justify-between text-gray-800 border-2 border-klik-orange shadow-2xl">
+                                <div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span id="card-level-badge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">Menengah</span>
+                                        <span id="card-category-badge" class="text-xs font-semibold text-gray-500">Kategori: Visual Emotion</span>
+                                    </div>
+                                    <h3 id="card-title" class="text-2xl font-black text-klik-dark mb-2">"Kesepian"</h3>
+                                    <p id="card-case" class="text-xs text-gray-600 mb-3 leading-relaxed">
+                                        Situasi: Seorang siswa duduk di sudut kantin yang ramai tanpa diajak bicara oleh siapapun.
+                                    </p>
+                                    <div class="bg-orange-50 p-3 rounded-xl border border-orange-100 text-xs space-y-1">
+                                        <span class="font-bold text-klik-orange">Misi Praktik:</span>
+                                        <p id="card-mission" class="text-gray-700">Rancang 1 adegan (shot list & perekaman 10 detik) untuk menyampaikan rasa isolasi/kesepian tanpa dialog!</p>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-t flex items-center justify-between text-xs text-gray-500">
+                                    <span>Gunakan teknik Frame & Angle</span>
+                                    <i data-lucide="camera" class="w-4 h-4 text-klik-dark"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center justify-center gap-4">
+                        <button onclick="drawChallengeCard()" class="px-6 py-3 bg-klik-orange hover:bg-klik-accent text-white font-bold rounded-xl shadow transition flex items-center space-x-2">
+                            <i data-lucide="shuffle" class="w-4 h-4"></i>
+                            <span>Undi Kartu Tantangan</span>
+                        </button>
+                        <button id="accept-challenge-btn" onclick="acceptCurrentChallenge()" class="px-6 py-3 bg-klik-dark hover:bg-klik-teal text-white font-bold rounded-xl shadow transition disabled:opacity-50 flex items-center space-x-2">
+                            <span>Ambil Tantangan Ini</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAHAP 4 — KEMBANGKAN SOLUSI ATAU KARYA (LKPD Digital) -->
+        <section id="view-step-4" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="border-b pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <span class="text-xs font-bold text-klik-dark uppercase tracking-widest">Tahap 4 dari 6</span>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                            <i data-lucide="file-text" class="w-6 h-6 text-klik-dark"></i>
+                            <span>Kembangkan Solusi / Karya (LKPD Digital)</span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Isi Lembar Kerja Peserta Didik (LKPD) digital secara berkolaborasi bersama kelompok Anda.</p>
+                    </div>
+                    <div class="flex items-center space-x-2 no-print">
+                        <button onclick="saveLKPD()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition flex items-center space-x-1">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Simpan Rancangan</span>
+                        </button>
+                        <button onclick="printLKPD()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs transition flex items-center space-x-1">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Cetak / Unduh LKPD</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Challenge Summary Box -->
+                <div class="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 p-4 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-klik-teal uppercase tracking-wider">Tantangan Terpilih</span>
+                        <h4 id="lkpd-challenge-title" class="font-extrabold text-klik-dark text-base">"Belum Ada Kartu Diundi"</h4>
+                        <p id="lkpd-challenge-desc" class="text-xs text-gray-600 mt-0.5">Silakan undi kartu di Tahap 3 terlebih dahulu.</p>
+                    </div>
+                    <span id="lkpd-challenge-level" class="text-xs font-bold bg-white text-klik-teal px-3 py-1 rounded-full border border-teal-200">Level -</span>
+                </div>
+
+                <!-- LKPD Form -->
+                <form id="lkpd-form" class="space-y-6">
+                    <!-- Section A: Identitas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Kelompok</label>
+                            <input type="text" id="lkpd-group-name" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="misal: Kelompok Cinephile 1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kelas / Konsentrasi</label>
+                            <input type="text" id="lkpd-class" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" value="XII SMK - Produksi Film">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Anggota Kelompok</label>
+                            <input type="text" id="lkpd-members" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Nama Anggota (pisahkan koma)">
+                        </div>
+                    </div>
+
+                    <!-- Section B: Analisis & Pembagian Peran -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase">1. Analisis Masalah / Tantangan Visual</label>
+                            <textarea id="lkpd-analysis" rows="4" class="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Jelaskan alasan pemikiran awal mengapa pesan visual ini penting dan emosi apa yang hendak dibangun..."></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase">2. Pembagian Peran Tim (Role Play)</label>
+                            <textarea id="lkpd-roles" rows="4" class="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Sutradara: ...&#10;Kameramen: ...&#10;Penata Cahaya: ...&#10;Aktor/Talenta: ..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section C: Perencanaan Teknik Visual -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-sm text-klik-dark uppercase tracking-wider">3. Perencanaan Solusi Teknik & Alat</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Rencana Shot Size & Angle</label>
+                                <input type="text" id="lkpd-shot-plan" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" placeholder="misal: High Angle + Extreme Long Shot">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Alat & Bahan Digunakan</label>
+                                <input type="text" id="lkpd-tools" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" placeholder="misal: Smartphone, Lighting Portable, Tripod">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Tautan Karya / Cloud Link</label>
+                                <input type="text" id="lkpd-link" class="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm" placeholder="https://drive.google.com/...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section D: Langkah Kerja & Keselamatan -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase">4. Langkah Kerja Praktik</label>
+                            <textarea id="lkpd-steps" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="1. Set-up lokasi kantin&#10;2. Pengaturan pencahayaan low-key&#10;3. Perekaman adegan 10 detik..."></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase">5. Catatan K3LH & Etika Karya</label>
+                            <textarea id="lkpd-safety" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Pastikan kabel lighting rapi, minta izin area pengambilan gambar, tidak merusak fasilitas sekolah..."></textarea>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="flex justify-between items-center pt-4 border-t">
+                    <button onclick="switchStep(3)" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">
+                        &larr; Kembali ke Tantangan
+                    </button>
+                    <button onclick="switchStep(5)" class="px-6 py-3 bg-klik-dark hover:bg-klik-teal text-white font-bold rounded-xl shadow transition flex items-center space-x-2">
+                        <span>Lanjut ke Tahap 5: Refleksi</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAHAP 5 — KAJI HASIL DAN REFLEKSI -->
+        <section id="view-step-5" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="border-b pb-4">
+                    <span class="text-xs font-bold text-klik-orange uppercase tracking-widest">Tahap 5 dari 6</span>
+                    <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                        <i data-lucide="message-square" class="w-6 h-6 text-klik-orange"></i>
+                        <span>Kaji Hasil dan Refleksi Experiential</span>
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Evaluasi pengalaman praktik, diskusikan bersama teman sebaya, dan berikan evaluasi jujur.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Reflection Questions -->
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-base text-klik-dark border-b pb-2">Refleksi Individu & Kelompok</h4>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700">1. Apa hal paling berharga yang Anda pelajari dari tantangan ini?</label>
+                            <textarea id="ref-q1" rows="2" class="w-full p-3 bg-slate-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Saya memahami bahwa..."></textarea>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700">2. Kesulitan utama apa yang dihadapi kelompok saat pengambilan gambar?</label>
+                            <textarea id="ref-q2" rows="2" class="w-full p-3 bg-slate-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Kendala teknis / koordinasi..."></textarea>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700">3. Apa hal yang akan Anda perbaiki pada proyek praktik berikutnya?</label>
+                            <textarea id="ref-q3" rows="2" class="w-full p-3 bg-slate-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Rencana perbaikan..."></textarea>
+                        </div>
+
+                        <button onclick="saveReflection()" class="w-full py-3 bg-klik-orange hover:bg-klik-accent text-white font-bold rounded-xl text-sm transition shadow">
+                            Simpan Hasil Refleksi
+                        </button>
+                    </div>
+
+                    <!-- Peer Feedback & Teacher Feedback Display -->
+                    <div class="space-y-6">
+                        <!-- Umpan Balik Teman Sebaya -->
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+                            <h4 class="font-bold text-sm text-gray-900 flex items-center space-x-2">
+                                <i data-lucide="users" class="w-4 h-4 text-klik-teal"></i>
+                                <span>Umpan Balik Teman Sebaya (Peer Review)</span>
+                            </h4>
+                            <div class="space-y-2 text-xs">
+                                <input type="text" id="peer-reviewer" class="w-full p-2 bg-white border rounded-lg" placeholder="Nama Penilai Sebaya (Kelompok Lain)">
+                                <textarea id="peer-comment" rows="2" class="w-full p-2 bg-white border rounded-lg" placeholder="Berikan tanggapan mengenai kejelasan makna visual karya kelompok ini..."></textarea>
+                                <button onclick="addPeerFeedback()" class="px-4 py-2 bg-klik-teal text-white rounded-lg font-semibold text-xs">Tambah Umpan Balik</button>
+                            </div>
+                            <div id="peer-feedback-list" class="space-y-2 pt-2">
+                                <!-- Dynamic List -->
+                            </div>
+                        </div>
+
+                        <!-- Umpan Balik Guru -->
+                        <div class="bg-teal-50 p-5 rounded-2xl border border-teal-200 space-y-2">
+                            <h4 class="font-bold text-sm text-klik-dark flex items-center space-x-2">
+                                <i data-lucide="award" class="w-4 h-4 text-klik-teal"></i>
+                                <span>Umpan Balik & Catatan Guru</span>
+                            </h4>
+                            <p id="teacher-feedback-display" class="text-xs text-teal-950 italic">
+                                "Sangat baik dalam pemilihan Low Angle untuk adegan penegasan emosi. Pertahankan eksplorasi lighting pada tugas berikutnya."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t">
+                    <button onclick="switchStep(4)" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">
+                        &larr; Kembali ke LKPD
+                    </button>
+                    <button onclick="switchStep(6)" class="px-6 py-3 bg-klik-dark hover:bg-klik-teal text-white font-bold rounded-xl shadow transition flex items-center space-x-2">
+                        <span>Lanjut ke Tahap 6: Lacak Hasil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAHAP 6 — LACAK PERKEMBANGAN (Sumatif & Progress Tracker) -->
+        <section id="view-step-6" class="view-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="border-b pb-4 flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-bold text-klik-teal uppercase tracking-widest">Tahap 6 dari 6</span>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-klik-teal"></i>
+                            <span>Lacak Perkembangan & Asesmen Sumatif</span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Uji pemahaman akhir dan periksa rekapitulasi nilai serta rekomendasi tindak lanjut Anda.</p>
+                    </div>
+                </div>
+
+                <!-- Sumative Test Box -->
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-base text-klik-dark">Asesmen Sumatif Akhir Modul</h3>
+                    <form id="sumative-form" class="space-y-4">
+                        <div class="space-y-2">
+                            <p class="text-sm font-semibold text-gray-800">1. Kombinasi shot mana yang paling tepat untuk menggambarkan perasaan seseorang yang sedang terkucilkan di ruangan luas?</p>
+                            <div class="space-y-1 text-xs">
+                                <label class="flex items-center space-x-2 p-2 bg-white rounded border">
+                                    <input type="radio" name="sum-q1" value="A">
+                                    <span>Extreme Long Shot + High Angle</span>
+                                </label>
+                                <label class="flex items-center space-x-2 p-2 bg-white rounded border">
+                                    <input type="radio" name="sum-q1" value="B">
+                                    <span>Close Up + Low Angle</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm font-semibold text-gray-800">2. Mengapa pertimbangan K3LH dan etika penting dilakukan sebelum perekaman karya visual di lingkungan sekolah?</p>
+                            <div class="space-y-1 text-xs">
+                                <label class="flex items-center space-x-2 p-2 bg-white rounded border">
+                                    <input type="radio" name="sum-q2" value="A">
+                                    <span>Agar proses produksi aman, tertib, dan menghormati hak subjek gambar</span>
+                                </label>
+                                <label class="flex items-center space-x-2 p-2 bg-white rounded border">
+                                    <input type="radio" name="sum-q2" value="B">
+                                    <span>Hanya formalitas dokumen tanpa dampak nyata</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="button" onclick="submitSumative()" class="px-5 py-2.5 bg-klik-dark text-white rounded-xl text-xs font-bold hover:bg-klik-teal transition">
+                            Submit Asesmen Sumatif
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Comprehensive Progress & Analytics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Score Card 1: Diagnostik vs Sumatif -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                        <h4 class="font-bold text-sm text-gray-700">Perbandingan Asesmen</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1">
+                                    <span>Diagnostik Awal</span>
+                                    <span id="track-diag-score">0 / 100</span>
+                                </div>
+                                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                    <div id="bar-diag" class="bg-gray-400 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1">
+                                    <span>Sumatif Akhir</span>
+                                    <span id="track-sum-score">0 / 100</span>
+                                </div>
+                                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                    <div id="bar-sum" class="bg-klik-teal h-full w-0 transition-all duration-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500 pt-1" id="track-comparison-note">
+                            Data akurat perkembangan belajar Anda akan diperbarui setelah melengkapi seluruh asesmen.
+                        </p>
+                    </div>
+
+                    <!-- Score Card 2: Status Praktik LKPD -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                        <h4 class="font-bold text-sm text-gray-700">Status LKPD & Karya</h4>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-orange-100 text-klik-orange flex items-center justify-center">
+                                <i data-lucide="check-square" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-sm text-gray-800" id="track-lkpd-status">Tersimpan</h5>
+                                <p class="text-xs text-gray-500" id="track-lkpd-group">Kelompok: -</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 bg-slate-50 p-2.5 rounded-lg border">
+                            <span class="font-semibold block">Tantangan Diselesaikan:</span>
+                            <span id="track-challenge-name">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation & Next Steps -->
+                    <div class="bg-gradient-to-br from-klik-dark to-slate-900 text-white p-5 rounded-2xl shadow-sm space-y-3">
+                        <h4 class="font-bold text-sm text-klik-orange flex items-center space-x-1">
+                            <i data-lucide="compass" class="w-4 h-4"></i>
+                            <span>Rekomendasi Tindak Lanjut</span>
+                        </h4>
+                        <p id="track-recommendation" class="text-xs text-emerald-100 leading-relaxed">
+                            Selesaikan kedua asesmen untuk membuka rekomendasi materi pengayaan atau remedial secara personal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GURU / TEACHER DASHBOARD VIEW -->
+        <section id="view-teacher-dashboard" class="view-panel hidden space-y-6">
+            <!-- Header Dashboard Guru -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center space-x-2 text-xs font-bold text-klik-orange bg-orange-50 px-3 py-1 rounded-full mb-1">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Panel Pengelolaan Guru</span>
+                    </div>
+                    <h2 class="text-2xl font-black text-klik-dark">Dashboard Kelola Pembelajaran</h2>
+                    <p class="text-sm text-gray-600">Atur modul ajar, bank soal, kartu tantangan, serta pantau rekapitulasi hasil belajar siswa.</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="startStudentFlow()" class="px-4 py-2 bg-klik-orange hover:bg-klik-accent text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-1">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        <span>Pratinjau Alur Murid</span>
+                    </button>
+                    <button onclick="setRole('student')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-gray-700 font-semibold text-xs rounded-xl transition">
+                        Keluar Mode Guru
+                    </button>
+                </div>
+            </div>
+
+            <!-- Teacher Navigation Tabs -->
+            <div class="flex space-x-2 overflow-x-auto border-b border-gray-200 pb-2 text-xs font-bold">
+                <button onclick="switchTeacherTab('tab-materi')" id="ttab-btn-materi" class="teacher-tab-btn px-4 py-2 rounded-xl bg-klik-dark text-white">Kelola Materi & Modul</button>
+                <button onclick="switchTeacherTab('tab-kartu')" id="ttab-btn-kartu" class="teacher-tab-btn px-4 py-2 rounded-xl bg-gray-100 text-gray-600">Kelola Kartu Tantangan</button>
+                <button onclick="switchTeacherTab('tab-rekap')" id="ttab-btn-rekap" class="teacher-tab-btn px-4 py-2 rounded-xl bg-gray-100 text-gray-600">Rekap Hasil & Rubrik</button>
+            </div>
+
+            <!-- TAB 1: Kelola Materi & Modul -->
+            <div id="ttab-content-materi" class="teacher-subtab bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <h3 class="font-bold text-lg text-klik-dark">Pengaturan Modul & Informasi Pembelajaran</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Mata Pelajaran</label>
+                        <input type="text" id="cfg-subject" class="w-full p-2.5 border rounded-lg text-sm" value="Produksi Film">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Elemen Pembelajaran</label>
+                        <input type="text" id="cfg-element" class="w-full p-2.5 border rounded-lg text-sm" value="Tata Kamera dan Tata Cahaya Film">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Topik Utama</label>
+                        <input type="text" id="cfg-topic" class="w-full p-2.5 border rounded-lg text-sm" value="Teknik Pengambilan Gambar untuk Membangun Makna Visual">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Fase / Kelas & Alokasi Waktu</label>
+                        <input type="text" id="cfg-class-time" class="w-full p-2.5 border rounded-lg text-sm" value="Fase F - Kelas XII SMK (2 × 45 Menit)">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tujuan Pembelajaran</label>
+                    <textarea id="cfg-goals" rows="3" class="w-full p-3 border rounded-xl text-sm">Peserta didik mampu merancang dan mengeksekusi pengambilan gambar menggunakan variasi shot size, angle, serta pencahayaan...</textarea>
+                </div>
+                <div class="pt-4 border-t space-y-3">
+                    <h4 class="font-bold text-sm text-klik-dark flex items-center space-x-2">
+                        <i data-lucide="key-round" class="w-4 h-4 text-klik-orange"></i>
+                        <span>Pengaturan Keamanan Akses Guru (Ubah PIN)</span>
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">PIN Guru Baru</label>
+                            <input type="password" id="cfg-new-pin" class="w-full p-2.5 border rounded-lg text-sm" placeholder="Masukkan PIN baru...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Konfirmasi PIN Baru</label>
+                            <input type="password" id="cfg-confirm-pin" class="w-full p-2.5 border rounded-lg text-sm" placeholder="Ulangi PIN baru...">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="saveSubjectSettings()" class="px-5 py-2.5 bg-klik-dark text-white rounded-xl text-xs font-bold shadow">Simpan Perubahan Modul & PIN</button>
+            </div>
+                <button onclick="saveSubjectSettings()" class="px-5 py-2.5 bg-klik-dark text-white rounded-xl text-xs font-bold shadow">Simpan Perubahan Modul</button>
+            </div>
+
+            <!-- TAB 2: Kelola Kartu Tantangan -->
+            <div id="ttab-content-kartu" class="teacher-subtab hidden bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-lg text-klik-dark">Kelola Kartu Tantangan Digital</h3>
+                    <button onclick="openAddCardModal()" class="px-4 py-2 bg-klik-orange hover:bg-klik-accent text-white font-bold text-xs rounded-xl flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Tambah Kartu Baru</span>
+                    </button>
+                </div>
+
+                <!-- Table Card List -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-600">
+                        <thead class="bg-slate-100 text-gray-700 font-bold uppercase">
+                            <tr>
+                                <th class="p-3">Judul / Topik Emosi</th>
+                                <th class="p-3">Tingkat Kesulitan</th>
+                                <th class="p-3">Situasi Kasus</th>
+                                <th class="p-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-cards-table-body" class="divide-y divide-gray-200">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: Rekap Hasil & Rubrik -->
+            <div id="ttab-content-rekap" class="teacher-subtab hidden bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h3 class="font-bold text-lg text-klik-dark">Rekapitulasi Hasil Belajar & Rubrik Penilaian</h3>
+                    <span class="text-xs bg-teal-50 text-klik-teal font-semibold px-3 py-1 rounded-full border border-teal-200">Monitoring Real-Time Sesi</span>
+                </div>
+                
+                <!-- Demo Class Summary -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border border-gray-200 rounded-lg">
+                        <thead class="bg-slate-100 font-bold text-gray-700 uppercase">
+                            <tr>
+                                <th class="p-3">Nama Siswa</th>
+                                <th class="p-3">Kelas / Rombel</th>
+                                <th class="p-3">Diagnostik</th>
+                                <th class="p-3">LKPD Karya</th>
+                                <th class="p-3">Sumatif</th>
+                                <th class="p-3">Status Refleksi</th>
+                                <th class="p-3">Tindak Lanjut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-monitoring-table" class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="p-3 font-semibold text-gray-900">Budi Pratama</td>
+                                <td class="p-3 text-gray-600">XII Produksi Film 1</td>
+                                <td class="p-3 text-emerald-600 font-bold">100</td>
+                                <td class="p-3">Tersimpan (Kelompok 1)</td>
+                                <td class="p-3 font-bold text-klik-teal">100</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Selesai</span></td>
+                                <td class="p-3 text-emerald-700 font-medium">Pengayaan (Advanced Shot)</td>
+                            </tr>
+                            <tr class="bg-amber-50/50">
+                                <td class="p-3 font-bold text-klik-dark" id="table-user-name">Belum Registrasi</td>
+                                <td class="p-3 font-medium text-gray-700" id="table-user-class">-</td>
+                                <td class="p-3 font-bold text-amber-600" id="table-user-diag">-</td>
+                                <td class="p-3" id="table-user-lkpd">Belum Selesai</td>
+                                <td class="p-3 font-bold text-klik-teal" id="table-user-sum">-</td>
+                                <td class="p-3" id="table-user-ref"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Draft</span></td>
+                                <td class="p-3 text-gray-500" id="table-user-rec">Belum Evaluasi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Authentikasi Sandi Guru -->
+    <div id="teacher-auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-5 relative">
+            <button onclick="closeTeacherAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center space-x-3 text-klik-dark">
+                <div class="w-12 h-12 rounded-2xl bg-orange-100 text-klik-orange flex items-center justify-center">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900">Akses Mode Guru</h3>
+                    <p class="text-xs text-gray-500">Masukkan PIN/Sandi Keamanan Pengajar</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-gray-700 uppercase">Kata Sandi / PIN</label>
+                <input type="password" id="teacher-pin-input" onkeypress="handlePinKeyPress(event)" class="w-full p-3 bg-slate-50 border border-gray-300 rounded-xl text-sm tracking-widest focus:ring-2 focus:ring-klik-orange focus:outline-none" placeholder="Masukkan PIN...">
+                <p id="pin-error-msg" class="hidden text-xs font-bold text-red-500">Kata sandi yang Anda masukkan salah!</p>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeTeacherAuthModal()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs rounded-xl">Batal</button>
+                <button onclick="verifyTeacherPin()" class="px-5 py-2.5 bg-klik-dark hover:bg-klik-teal text-white font-bold text-xs rounded-xl shadow transition">Masuk Dashboard Guru</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-500 space-y-2">
+            <p class="font-bold text-gray-700">KLIK — Kartu Literasi, Inovasi, dan Keterampilan SMK</p>
+            <p>Bahan Ajar Digital Interaktif Berbasis Experiential Learning & Student-Centered Learning</p>
+            <p class="text-gray-400">&copy; 2026 KLIK Media Pembelajaran Digital SMK.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // APP INITIAL STATE & STORAGE MANAGEMENT
+        const STORAGE_KEY = 'klik_smk_state_v1';
+        let defaultTeacherPin = '1234';
+
+        let appData = {
+            role: 'student', // 'student' or 'teacher'
+            isTeacherAuthenticated: false,
+            teacherPin: defaultTeacherPin,
+            currentStep: 1,
+            subjectInfo: {
+                title: "Produksi Film",
+                element: "Tata Kamera dan Tata Cahaya Film",
+                topic: "Teknik Pengambilan Gambar untuk Membangun Makna Visual",
+                classTime: "Fase F - Kelas XII SMK (2 × 45 Menit)",
+                goals: "Peserta didik mampu merancang dan mengeksekusi pengambilan gambar menggunakan variasi shot size, angle, serta pencahayaan..."
+            },
+            challenges: [
+                { id: 1, title: "Kesepian", level: "Menengah", category: "Visual Emotion", case: "Seorang siswa duduk sendirian di sudut lapangan saat jam istirahat tanpa berinteraksi.", mission: "Rancang 1 adegan (shot list & rekaman 10 detik) untuk menyampaikan rasa isolasi tanpa dialog." },
+                { id: 2, title: "Keberanian", level: "Dasar", category: "Character Power", case: "Karakter utama berdiri di depan pintu ruang ujian akhir setelah berminggu-minggu belajar.", mission: "Gunakan teknik Low Angle untuk memperlihatkan keteguhan dan rasa percaya diri karakter." },
+                { id: 3, title: "Keraguan", level: "Lanjutan", category: "Psychological Visual", case: "Karakter memegang dua surat keputusan yang akan menentukan arah masa depannya.", mission: "Gunakan pencahayaan kontras (Low-Key) dan pergerakan kamera lambat untuk menangkap kegelisahan batin." },
+                { id: 4, title: "Harapan", level: "Dasar", category: "Visual Emotion", case: "Seseorang melihat fajar menyingsing dari jendela studio kerja setelah begadang.", mission: "Rancang shot dengan komposisi Rule of Thirds dan High-Key lighting hangat." }
+            ],
+            userProgress: {
+                studentName: "",
+                studentClass: "",
+                diagScore: null,
+                diagAnswers: {},
+                selectedChallenge: null,
+                lkpdData: {
+                    groupName: "",
+                    class: "XII SMK - Produksi Film",
+                    members: "",
+                    analysis: "",
+                    roles: "",
+                    shotPlan: "",
+                    tools: "",
+                    link: "",
+                    steps: "",
+                    safety: ""
+                },
+                reflections: { q1: "", q2: "", q3: "" },
+                peerFeedbacks: [],
+                sumativeScore: null
+            }
+        };
+
+        // Load persisted state if exists
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appData = { ...appData, ...parsed };
+                }
+            } catch (e) {
+                console.error("Gagal memuat state dari localStorage:", e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) {
+                console.error("Gagal menyimpan state ke localStorage:", e);
+            }
+        }
+
+        // ROLE MANAGEMENT & TEACHER AUTHENTICATION
+        function setRole(role) {
+            if (role === 'teacher' && !appData.isTeacherAuthenticated) {
+                promptTeacherAuth();
+                return;
+            }
+
+            appData.role = role;
+            updateRoleUI();
+            
+            if (role === 'teacher') {
+                switchTab('teacher-dashboard');
+                showToast("Berhasil masuk Mode Guru (Akses Diterima)");
+            } else {
+                switchTab('landing');
+                showToast("Beralih ke Mode Murid");
+            }
+        }
+
+        function promptTeacherAuth() {
+            if (appData.isTeacherAuthenticated) {
+                appData.role = 'teacher';
+                updateRoleUI();
+                switchTab('teacher-dashboard');
+                return;
+            }
+            const modal = document.getElementById('teacher-auth-modal');
+            const pinInput = document.getElementById('teacher-pin-input');
+            const errorMsg = document.getElementById('pin-error-msg');
+            pinInput.value = '';
+            errorMsg.classList.add('hidden');
+            modal.classList.remove('hidden');
+            setTimeout(() => pinInput.focus(), 100);
+        }
+
+        function closeTeacherAuthModal() {
+            document.getElementById('teacher-auth-modal').classList.add('hidden');
+        }
+
+        function verifyTeacherPin() {
+            const pinInput = document.getElementById('teacher-pin-input').value;
+            const errorMsg = document.getElementById('pin-error-msg');
+            
+            if (pinInput === appData.teacherPin) {
+                appData.isTeacherAuthenticated = true;
+                appData.role = 'teacher';
+                closeTeacherAuthModal();
+                updateRoleUI();
+                switchTab('teacher-dashboard');
+                showToast("Autentikasi Guru Berhasil!");
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function handlePinKeyPress(e) {
+            if (e.key === 'Enter') {
+                verifyTeacherPin();
+            }
+        }
+
+        function updateRoleUI() {
+            const btnStudent = document.getElementById('role-btn-student');
+            const btnTeacher = document.getElementById('role-btn-teacher');
+
+            if (appData.role === 'teacher') {
+                btnTeacher.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1 bg-klik-orange text-white shadow";
+                btnStudent.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1 text-gray-300 hover:text-white";
+            } else {
+                btnStudent.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1 bg-klik-teal text-white shadow";
+                btnTeacher.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-1 text-gray-300 hover:text-white";
+            }
+        }
+
+        // NAVIGATION & VIEWS CONTROL
+        function switchTab(viewName) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+            const stepperBar = document.getElementById('learning-stepper-bar');
+
+            if (viewName === 'landing') {
+                document.getElementById('view-landing').classList.remove('hidden');
+                stepperBar.classList.add('hidden');
+            } else if (viewName === 'teacher-dashboard') {
+                document.getElementById('view-teacher-dashboard').classList.remove('hidden');
+                stepperBar.classList.add('hidden');
+                renderTeacherCardTable();
+                renderTeacherMonitoring();
+            } else if (viewName.startsWith('step-')) {
+                const stepNum = parseInt(viewName.replace('step-', ''));
+                appData.currentStep = stepNum;
+                stepperBar.classList.remove('hidden');
+                document.getElementById(`view-step-${stepNum}`).classList.remove('hidden');
+                updateStepperUI(stepNum);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startStudentFlow() {
+            appData.role = 'student';
+            updateRoleUI();
+            switchStep(1);
+            showToast("Memulai alur belajar murid: Tahap 1 Asesmen Diagnostik");
+        }
+
+        function switchStep(stepNum) {
+            switchTab(`step-${stepNum}`);
+        }
+
+        function updateStepperUI(activeStep) {
+            for (let i = 1; i <= 6; i++) {
+                const badge = document.getElementById(`step-btn-${i}`);
+                if (!badge) continue;
+
+                if (i === activeStep) {
+                    badge.className = "step-badge flex items-center space-x-1 px-3 py-1 rounded-lg text-xs font-bold bg-klik-teal text-white shadow transition";
+                } else if (i < activeStep) {
+                    badge.className = "step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800 transition cursor-pointer";
+                } else {
+                    badge.className = "step-badge flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-500 transition cursor-pointer";
+                }
+            }
+        }
+
+        // TAHAP 1: DIAGNOSTIK & REGISTRASI
+        function updateStudentIdentity() {
+            const name = document.getElementById('student-name-input').value;
+            const className = document.getElementById('student-class-input').value;
+            appData.userProgress.studentName = name;
+            appData.userProgress.studentClass = className;
+            saveState();
+        }
+
+        function submitDiagnostic() {
+            const q1 = document.querySelector('input[name="diag-q1"]:checked')?.value;
+            const q2 = document.querySelector('input[name="diag-q2"]:checked')?.value;
+            const q3 = document.getElementById('diag-q3')?.value;
+
+            if (!q1 || !q2) {
+                showToast("Harap lengkapi pertanyaan pilihan ganda & Benar/Salah terlebih dahulu.");
+                return;
+            }
+
+            let score = 0;
+            if (q1 === "Close Up") score += 50;
+            if (q2 === "Salah") score += 50; // Low angle memberikan kesan kuat/dominan (jadi Benar=salah)
+
+            appData.userProgress.diagScore = score;
+            appData.userProgress.diagAnswers = { q1, q2, q3 };
+
+            document.getElementById('diag-score-display').innerText = `Skor: ${score} / 100`;
+            const resultBox = document.getElementById('diagnostic-result-box');
+            const feedbackText = document.getElementById('diagnostic-feedback-text');
+
+            resultBox.classList.remove('hidden');
+
+            if (score === 100) {
+                feedbackText.innerText = "Luar biasa! Pemahaman awal Anda tentang shot size dan camera angle sudah sangat matang. Anda siap menjelajahi tantangan tingkat menengah/lanjutan!";
+            } else if (score >= 50) {
+                feedbackText.innerText = "Bagus! Anda sudah memiliki pemahaman dasar yang cukup. Disarankan untuk membaca Tahap 2 dengan cermat sebelum mempraktikkan tantangan.";
+            } else {
+                feedbackText.innerText = "Kesiapan awal Anda tergolong perlu pembimbingan. Jangan khawatir, pelajari secara seksama visualizer interaktif di Tahap 2 untuk mengasah intuisi visual Anda!";
+            }
+
+            saveState();
+            showToast("Asesmen Diagnostik Berhasil Terkirim!");
+        }
+
+        // TAHAP 2: SIMULASI MATERI
+        function updateSim(type) {
+            const frame = document.getElementById('sim-frame');
+            const subject = document.getElementById('sim-subject');
+            const label = document.getElementById('sim-label');
+
+            if (type === 'CU') {
+                subject.className = "w-44 h-40 bg-gradient-to-t from-klik-orange to-amber-300 rounded-lg flex flex-col items-center justify-center text-slate-900 font-extrabold text-xs transition-all duration-500 shadow-xl scale-125 translate-y-6";
+                label.innerText = "Close Up (Wajah)";
+            } else if (type === 'MS') {
+                subject.className = "w-28 h-36 bg-gradient-to-t from-klik-orange to-amber-300 rounded-lg flex flex-col items-center justify-center text-slate-900 font-extrabold text-xs transition-all duration-500 shadow-xl";
+                label.innerText = "Medium Shot (Pinggang)";
+            } else if (type === 'ELS') {
+                subject.className = "w-10 h-14 bg-gradient-to-t from-klik-orange to-amber-300 rounded-lg flex flex-col items-center justify-center text-slate-900 font-extrabold text-[9px] transition-all duration-500 shadow-xl scale-75";
+                label.innerText = "ELS (Jauh)";
+            }
+        }
+
+        function confirmUnderstanding(understood) {
+            if (understood) {
+                showToast("Pemahaman dicatat! Melanjutkan ke Tahap 3: Tantangan Kartu");
+                switchStep(3);
+            } else {
+                showToast("Silakan tinjau kembali poin ringkasan materi dan cobalah visualizer interaktif.");
+            }
+        }
+
+        // TAHAP 3: KARTU TANTANGAN DIGITAL
+        let filteredChallengesList = [...appData.challenges];
+
+        function filterChallenges() {
+            const filterVal = document.getElementById('challenge-level-filter').value;
+            if (filterVal === 'all') {
+                filteredChallengesList = [...appData.challenges];
+            } else {
+                filteredChallengesList = appData.challenges.filter(c => c.level === filterVal);
+            }
+            showToast(`Filter diterapkan: ${filteredChallengesList.length} kartu tersedia.`);
+        }
+
+        function drawChallengeCard() {
+            if (filteredChallengesList.length === 0) {
+                showToast("Tidak ada kartu tersedia untuk filter ini.");
+                return;
+            }
+
+            const cardInner = document.getElementById('challenge-card-inner');
+            const randomIndex = Math.floor(Math.random() * filteredChallengesList.length);
+            const selected = filteredChallengesList[randomIndex];
+
+            document.getElementById('card-level-badge').innerText = selected.level;
+            document.getElementById('card-category-badge').innerText = `Kategori: ${selected.category}`;
+            document.getElementById('card-title').innerText = `"${selected.title}"`;
+            document.getElementById('card-case').innerText = `Situasi: ${selected.case}`;
+            document.getElementById('card-mission').innerText = selected.mission;
+
+            cardInner.classList.add('is-flipped');
+            appData.userProgress.selectedChallenge = selected;
+            saveState();
+        }
+
+        function acceptCurrentChallenge() {
+            if (!appData.userProgress.selectedChallenge) {
+                showToast("Harap undi kartu tantangan terlebih dahulu!");
+                return;
+            }
+            updateLKPDHeader();
+            showToast("Tantangan diterima! Membuka Lembar Kerja LKPD Digital...");
+            switchStep(4);
+        }
+
+        function updateLKPDHeader() {
+            const ch = appData.userProgress.selectedChallenge;
+            if (!ch) return;
+
+            document.getElementById('lkpd-challenge-title').innerText = `"${ch.title}" (${ch.category})`;
+            document.getElementById('lkpd-challenge-desc').innerText = `Misi: ${ch.mission}`;
+            document.getElementById('lkpd-challenge-level').innerText = `Tingkat: ${ch.level}`;
+        }
+
+        // TAHAP 4: LKPD DIGITAL
+        function saveLKPD() {
+            appData.userProgress.lkpdData = {
+                groupName: document.getElementById('lkpd-group-name').value,
+                class: document.getElementById('lkpd-class').value,
+                members: document.getElementById('lkpd-members').value,
+                analysis: document.getElementById('lkpd-analysis').value,
+                roles: document.getElementById('lkpd-roles').value,
+                shotPlan: document.getElementById('lkpd-shot-plan').value,
+                tools: document.getElementById('lkpd-tools').value,
+                link: document.getElementById('lkpd-link').value,
+                steps: document.getElementById('lkpd-steps').value,
+                safety: document.getElementById('lkpd-safety').value
+            };
+            saveState();
+            showToast("Rancangan LKPD Digital berhasil disimpan!");
+        }
+
+        function printLKPD() {
+            saveLKPD();
+            window.print();
+        }
+
+        // TAHAP 5: REFLEKSI & PEER FEEDBACK
+        function saveReflection() {
+            appData.userProgress.reflections = {
+                q1: document.getElementById('ref-q1').value,
+                q2: document.getElementById('ref-q2').value,
+                q3: document.getElementById('ref-q3').value
+            };
+            saveState();
+            showToast("Hasil refleksi individu dan kelompok berhasil tersimpan!");
+        }
+
+        function addPeerFeedback() {
+            const reviewer = document.getElementById('peer-reviewer').value;
+            const comment = document.getElementById('peer-comment').value;
+
+            if (!reviewer || !comment) {
+                showToast("Isi nama penilai dan umpan balik terlebih dahulu.");
+                return;
+            }
+
+            const item = { reviewer, comment, date: new Date().toLocaleDateString() };
+            appData.userProgress.peerFeedbacks.push(item);
+
+            renderPeerFeedbacks();
+            document.getElementById('peer-reviewer').value = '';
+            document.getElementById('peer-comment').value = '';
+            saveState();
+            showToast("Umpan balik sebaya ditambahkan!");
+        }
+
+        function renderPeerFeedbacks() {
+            const container = document.getElementById('peer-feedback-list');
+            container.innerHTML = '';
+            appData.userProgress.peerFeedbacks.forEach(fb => {
+                const el = document.createElement('div');
+                el.className = "p-2.5 bg-white border border-gray-200 rounded-lg text-xs space-y-1 shadow-sm";
+                el.innerHTML = `
+                    <div class="flex justify-between font-bold text-gray-800">
+                        <span>${escapeHtml(fb.reviewer)}</span>
+                        <span class="text-[10px] text-gray-400">${fb.date}</span>
+                    </div>
+                    <p class="text-gray-600">${escapeHtml(fb.comment)}</p>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        // TAHAP 6: SUMATIF & PROGRESS TRACKER
+        function submitSumative() {
+            const q1 = document.querySelector('input[name="sum-q1"]:checked')?.value;
+            const q2 = document.querySelector('input[name="sum-q2"]:checked')?.value;
+
+            if (!q1 || !q2) {
+                showToast("Harap jawab semua soal sumatif akhir.");
+                return;
+            }
+
+            let score = 0;
+            if (q1 === 'A') score += 50; // ELS + High Angle untuk kesepian/terkucilkan
+            if (q2 === 'A') score += 50; // K3LH dan Etika
+
+            appData.userProgress.sumativeScore = score;
+            saveState();
+            renderProgressTracker();
+            showToast(`Asesmen Sumatif selesai! Skor Anda: ${score}`);
+        }
+
+        function renderProgressTracker() {
+            const diag = appData.userProgress.diagScore ?? 0;
+            const sum = appData.userProgress.sumativeScore ?? 0;
+
+            document.getElementById('track-diag-score').innerText = `${diag} / 100`;
+            document.getElementById('bar-diag').style.width = `${diag}%`;
+
+            document.getElementById('track-sum-score').innerText = `${sum} / 100`;
+            document.getElementById('bar-sum').style.width = `${sum}%`;
+
+            const note = document.getElementById('track-comparison-note');
+            const rec = document.getElementById('track-recommendation');
+
+            if (appData.userProgress.sumativeScore !== null) {
+                const diff = sum - diag;
+                if (diff > 0) {
+                    note.innerText = `Luar biasa! Terjadi peningkatan nilai sebesar +${diff} poin dari diagnostik awal.`;
+                    rec.innerText = "Rekomendasi Pengayaan: Anda disarankan mengambil proyek tantangan Lanjutan (Advanced Lighting & Composition) untuk portofolio kejuruan.";
+                } else {
+                    note.innerText = "Nilai Anda stabil. Pertahankan konsistensi praktikum!";
+                    rec.innerText = "Rekomendasi Penguatan: Tinjau kembali Tahap 2 dan lakukan pengulangan pengambilan karya shot size sederhana.";
+                }
+            }
+
+            // Status LKPD
+            if (appData.userProgress.selectedChallenge) {
+                document.getElementById('track-challenge-name').innerText = appData.userProgress.selectedChallenge.title;
+            }
+            if (appData.userProgress.lkpdData.groupName) {
+                document.getElementById('track-lkpd-group').innerText = `Kelompok: ${appData.userProgress.lkpdData.groupName}`;
+            }
+        }
+
+        // DASHBOARD GURU LOGIC
+        function switchTeacherTab(tabId) {
+            document.querySelectorAll('.teacher-subtab').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.teacher-tab-btn').forEach(btn => {
+                btn.className = "teacher-tab-btn px-4 py-2 rounded-xl bg-gray-100 text-gray-600";
+            });
+
+            document.getElementById(`ttab-content-${tabId.replace('tab-', '')}`).classList.remove('hidden');
+            document.getElementById(`ttab-btn-${tabId.replace('tab-', '')}`).className = "teacher-tab-btn px-4 py-2 rounded-xl bg-klik-dark text-white";
+        }
+
+        function saveSubjectSettings() {
+            const newPin = document.getElementById('cfg-new-pin').value;
+            const confirmPin = document.getElementById('cfg-confirm-pin').value;
+
+            if (newPin || confirmPin) {
+                if (newPin !== confirmPin) {
+                    showToast("Konfirmasi PIN baru tidak cocok!");
+                    return;
+                }
+                appData.teacherPin = newPin;
+                document.getElementById('cfg-new-pin').value = '';
+                document.getElementById('cfg-confirm-pin').value = '';
+            }
+
+            appData.subjectInfo = {
+                title: document.getElementById('cfg-subject').value,
+                element: document.getElementById('cfg-element').value,
+                topic: document.getElementById('cfg-topic').value,
+                classTime: document.getElementById('cfg-class-time').value,
+                goals: document.getElementById('cfg-goals').value
+            };
+            saveState();
+            updateSubjectDOM();
+            showToast("Konfigurasi Modul Ajar dan Keamanan Guru berhasil diperbarui!");
+        }
+
+        function updateSubjectDOM() {
+            const s = appData.subjectInfo;
+            document.getElementById('stepper-subject').innerText = s.title;
+            document.getElementById('stepper-topic').innerText = s.topic;
+            document.getElementById('preview-subject-title').innerText = `${s.title} — ${s.element}`;
+            document.getElementById('preview-subject-topic').innerText = `Topik: ${s.topic}`;
+        }
+
+        function renderTeacherCardTable() {
+            const tbody = document.getElementById('teacher-cards-table-body');
+            tbody.innerHTML = '';
+            appData.challenges.forEach(card => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-gray-800">${escapeHtml(card.title)} <span class="text-[10px] text-gray-500 block font-normal">${card.category}</span></td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${card.level==='Dasar'?'bg-emerald-100 text-emerald-800':card.level==='Menengah'?'bg-amber-100 text-amber-800':'bg-red-100 text-red-800'}">${card.level}</span></td>
+                    <td class="p-3 text-gray-600 max-w-xs truncate">${escapeHtml(card.case)}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteChallengeCard(${card.id})" class="text-red-600 hover:text-red-800 font-bold">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteChallengeCard(id) {
+            appData.challenges = appData.challenges.filter(c => c.id !== id);
+            saveState();
+            renderTeacherCardTable();
+            showToast("Kartu tantangan dihapus.");
+        }
+
+        function openAddCardModal() {
+            const title = prompt("Masukkan Judul/Topik Emosi Kartu:");
+            if (!title) return;
+            const level = prompt("Masukkan Tingkat (Dasar / Menengah / Lanjutan):", "Menengah");
+            const category = prompt("Masukkan Kategori (misal: Visual Emotion):", "Visual Emotion");
+            const caseText = prompt("Deskripsi Kasus Kejuruan:");
+            const mission = prompt("Misi Praktik:");
+
+            const newCard = {
+                id: Date.now(),
+                title,
+                level: level || "Menengah",
+                category: category || "Visual Emotion",
+                case: caseText || "-",
+                mission: mission || "-"
+            };
+
+            appData.challenges.push(newCard);
+            saveState();
+            renderTeacherCardTable();
+            showToast("Kartu tantangan baru berhasil dibuat!");
+        }
+
+        function renderTeacherMonitoring() {
+            const name = appData.userProgress.studentName || "Siswa Sesi Aktif";
+            const cls = appData.userProgress.studentClass || "-";
+            const diag = appData.userProgress.diagScore !== null ? `${appData.userProgress.diagScore}` : "-";
+            const sum = appData.userProgress.sumativeScore !== null ? `${appData.userProgress.sumativeScore}` : "-";
+            const lkpdGroup = appData.userProgress.lkpdData.groupName ? `Tersimpan (${appData.userProgress.lkpdData.groupName})` : "Belum Selesai";
+            const isRef = appData.userProgress.reflections.q1 ? `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Selesai</span>` : `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Draft</span>`;
+            
+            let rec = "Belum Evaluasi";
+            if (appData.userProgress.sumativeScore !== null) {
+                rec = appData.userProgress.sumativeScore >= 75 ? "Pengayaan (Advanced Shot)" : "Pendampingan Remedial";
+            }
+
+            document.getElementById('table-user-name').innerText = name;
+            document.getElementById('table-user-class').innerText = cls;
+            document.getElementById('table-user-diag').innerText = diag;
+            document.getElementById('table-user-lkpd').innerText = lkpdGroup;
+            document.getElementById('table-user-sum').innerText = sum;
+            document.getElementById('table-user-ref').innerHTML = isRef;
+            document.getElementById('table-user-rec').innerText = rec;
+        }
+
+        // UTILITY FUNCTIONS
+        function showToast(msg) {
+            const toast = document.getElementById('toast-message');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // APP INIT
+        window.onload = function() {
+            loadState();
+            updateRoleUI();
+            updateSubjectDOM();
+            renderPeerFeedbacks();
+
+            // Re-bind Lucide Icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+</html>
