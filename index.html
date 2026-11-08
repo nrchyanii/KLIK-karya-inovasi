@@ -284,21 +284,21 @@
                     <!-- Q1 PG -->
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                         <div class="flex items-start justify-between">
-                            <label class="font-semibold text-gray-800 text-sm sm:text-base">1. Manakah dari pilihan shot size berikut yang paling efektif untuk memperlihatkan emosi dan ekspresi wajah karakter secara mendalam?</label>
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">1. Kamera diletakkan setinggi mata subjek. Sudut pengambilan ini disebut...</label>
                             <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Pilihan Ganda</span>
                         </div>
                         <div class="space-y-2 text-sm">
                             <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
                                 <input type="radio" name="diag-q1" value="Extreme Long Shot" class="text-klik-dark focus:ring-klik-teal">
-                                <span>A. Extreme Long Shot (ELS)</span>
+                                <span>A. Medium Shot</span>
                             </label>
                             <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
                                 <input type="radio" name="diag-q1" value="Close Up" class="text-klik-dark focus:ring-klik-teal">
-                                <span>B. Close Up (CU)</span>
+                                <span>B. Eye level</span>
                             </label>
                             <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
                                 <input type="radio" name="diag-q1" value="Medium Shot" class="text-klik-dark focus:ring-klik-teal">
-                                <span>C. Medium Shot (MS)</span>
+                                <span>C. High angle(MS)</span>
                             </label>
                         </div>
                     </div>
@@ -306,17 +306,17 @@
                     <!-- Q2 Benar/Salah -->
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                         <div class="flex items-start justify-between">
-                            <label class="font-semibold text-gray-800 text-sm sm:text-base">2. Sudut pengambilan gambar Low Angle memberikan kesan subjek terlihat lemah, tertekan, dan tidak berdaya.</label>
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">2. Extreme close up pada tangan yang gemetar sering dugunakan dalam adegan tegang agar penonton fokus pada detail yang menunjukkan perasaan atau kondisi emosional tokoh.</label>
                             <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Benar / Salah</span>
                         </div>
                         <div class="flex space-x-4 text-sm">
                             <label class="flex-1 flex items-center justify-center space-x-2 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
                                 <input type="radio" name="diag-q2" value="Benar" class="text-klik-dark">
-                                <span class="font-medium">Benar</span>
+                                <span class="font-medium">Salah</span>
                             </label>
                             <label class="flex-1 flex items-center justify-center space-x-2 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-slate-100 transition">
                                 <input type="radio" name="diag-q2" value="Salah" class="text-klik-dark">
-                                <span class="font-medium">Salah</span>
+                                <span class="font-medium">Benar</span>
                             </label>
                         </div>
                     </div>
@@ -324,7 +324,7 @@
                     <!-- Q3 Isian Singkat -->
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                         <div class="flex items-start justify-between">
-                            <label class="font-semibold text-gray-800 text-sm sm:text-base">3. Menurut pemahaman awal Anda, apa fungsi utama pergerakan kamera (camera movement) Tilting dalam sebuah adegan?</label>
+                            <label class="font-semibold text-gray-800 text-sm sm:text-base">3. Dalam sebuah adegan, Anda ingin memperlihatkan seorang tokoh dari sepatu hingga ekspresi wajahnya. Bagaimana Anda menggunakan gerakan kamera tilting untuk menghasilkan pengambilan gambar tersebut?</label>
                             <span class="text-xs font-semibold text-gray-500 bg-white px-2 py-1 rounded border">Jawaban Singkat</span>
                         </div>
                         <textarea id="diag-q3" rows="2" class="w-full p-3 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-klik-teal focus:outline-none" placeholder="Tuliskan jawaban Anda di sini..."></textarea>
@@ -403,7 +403,7 @@
                             <div id="sim-frame" class="w-full h-48 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700 relative overflow-hidden transition-all duration-300">
                                 <div id="sim-subject" class="w-20 h-28 bg-gradient-to-t from-klik-orange to-amber-300 rounded-lg flex flex-col items-center justify-center text-slate-900 font-extrabold text-xs transition-all duration-500 shadow-xl">
                                     <i data-lucide="user" class="w-10 h-10"></i>
-                                    <img id="closeup.jpg"></span>
+                                    <img id="sim-img" src="closeup.jpg" alt="Subject" class="w-full h-full object-cover rounded-lg">
                                 </div>
                                 <div class="absolute bottom-2 left-2 text-[10px] text-gray-400 bg-slate-950/70 px-2 py-1 rounded">
                                     Angle: <span id="sim-angle-text">Eye Level</span>
